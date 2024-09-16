@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炼铁健身教练工资计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .calculator {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .info {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>炼铁健身教练工资计算器</h1>
+        <div>
+            <label for="calculationDate">计算日期</label>
+            <input type="date" id="calculationDate" required>
+        </div>
+        <div>
+            <label for="salesAmount">销售金额 (元)</label>
+            <input type="number" id="salesAmount" placeholder="请输入销售金额" required>
+        </div>
+        <div>
+            <label for="classAmount">上课金额 (元)</label>
+            <input type="number" id="classAmount" placeholder="请输入上课金额" required>
+        </div>
+        <button onclick="calculateSalary()">计算工资</button>
+        <div id="result"></div>
+        <div class="info">
+            <p>开发：一风</p>
+            <p>版本号：0.2</p>
+        </div>
+    </div>
+
+    <script>
+        const salaryTiers = [
+            { threshold: 3000, baseSalary: 800, performanceRate: 0.02, classRate: 0.20 },
+            { threshold: 6000, baseSalary: 1000, performanceRate: 0.04, classRate: 0.20 },
+            { threshold: 10000, baseSalary: 1100, performanceRate: 0.06, classRate: 0.23 },
+            { threshold: 15000, baseSalary: 1200, performanceRate: 0.07, classRate: 0.25 },
+            { threshold: 20000, baseSalary: 1300, performanceRate: 0.08, classRate: 0.28 },
+            { threshold: 25000, baseSalary: 1400, performanceRate: 0.09, classRate: 0.30 },
+            { threshold: 30000, baseSalary: 1500, performanceRate: 0.10, classRate: 0.32 },
+            { threshold: 35000, baseSalary: 1600, performanceRate: 0.11, classRate: 0.34 },
+            { threshold: 40000, baseSalary: 1700, performanceRate: 0.12, classRate: 0.36 },
+            { threshold: 45000, baseSalary: 1800, performanceRate: 0.13, classRate: 0.38 },
+            { threshold: 50000, baseSalary: 2000, performanceRate: 0.15, classRate: 0.40 },
+        ];
+
+        function calculateSalary() {
+            const calculationDate = new Date(document.getElementById('calculationDate').value);
+            const salesAmount = Number(document.getElementById('salesAmount').value);
+            const classAmount = Number(document.getElementById('classAmount').value);
+            
+            const cutoffDate = new Date('2024-09-25');
+            let totalAmount;
+
+            if (calculationDate < cutoffDate) {
+                totalAmount = salesAmount; // 首月工资，上课金额已包含在销售金额中
+            } else {
+                totalAmount = salesAmount + classAmount; // 2024年9月25日之后，单独累计上课金额
+            }
+
+            let tier = salaryTiers[0];
+            for (let i = salaryTiers.length - 1; i >= 0; i--) {
+                if (totalAmount >= salaryTiers[i].threshold) {
+                    tier = salaryTiers[i];
+                    break;
+                }
+            }
+
+            const baseSalary = tier.baseSalary;
+            const performanceCommission = salesAmount * tier.performanceRate;
+            let classCommission = 0;
+            if (calculationDate >= cutoffDate) {
+                classCommission = classAmount * tier.classRate;
+            }
+            const total = baseSalary + performanceCommission + classCommission;
+
+            document.getElementById('result').innerHTML = `
+                <h3>计算结果：</h3>
+                <p>计算日期：${calculationDate.toLocaleDateString()}</p>
+                <p>总业绩：¥${totalAmount.toFixed(2)}</p>
+                <p>底薪：¥${baseSalary.toFixed(2)}</p>
+                <p>绩效提成：¥${performanceCommission.toFixed(2)}</p>
+                <p>课时费提成：¥${classCommission.toFixed(2)}</p>
+                <p><strong>总工资：¥${total.toFixed(2)}</strong></p>
+            `;
+        }
+    </script>
+</body>
+</html>
