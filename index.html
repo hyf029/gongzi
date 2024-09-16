@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>炼铁健身教练工资计算器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-blue-200 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl">
+    <div class="bg-blue-600 text-white p-6">
+      <h1 class="text-3xl font-bold text-center">炼铁健身教练工资计算器</h1>
+    </div>
+    <div class="p-6 space-y-6">
+      <div class="space-y-4">
+        <div>
+          <label for="sales" class="block text-sm font-medium text-gray-700">本月销售金额（元）</label>
+          <input type="number" id="sales" name="sales" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+          <label for="lastMonthBalance" class="block text-sm font-medium text-gray-700">上月结余课时金额（元）</label>
+          <input type="number" id="lastMonthBalance" name="lastMonthBalance" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+          <label for="currentMonthClasses" class="block text-sm font-medium text-gray-700">本月上课金额（元）</label>
+          <input type="number" id="currentMonthClasses" name="currentMonthClasses" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+      <button id="calculate" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+        计算工资
+      </button>
+    </div>
+    <div id="result" class="hidden">
+      <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
+        <h2 class="text-2xl font-semibold mb-4 text-blue-600">工资计算结果</h2>
+        <div id="resultContent" class="space-y-2 text-gray-700"></div>
+      </div>
+    </div>
+    <div class="bg-gray-100 p-4 text-center text-gray-600">
+      <p>开发：一风</p>
+      <p>版本号：v1.0.4</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('calculate').addEventListener('click', function() {
+      const sales = parseFloat(document.getElementById('sales').value);
+      const lastMonthBalance = parseFloat(document.getElementById('lastMonthBalance').value);
+      const currentMonthClasses = parseFloat(document.getElementById('currentMonthClasses').value);
+
+      // 定义工资等级和提成比例
+      const salaryLevels = [
+        { threshold: 0, baseSalary: 800, performanceRate: 0.02, classRate: 0.20 },
+        { threshold: 6000, baseSalary: 1000, performanceRate: 0.04, classRate: 0.20 },
+        { threshold: 10000, baseSalary: 1100, performanceRate: 0.06, classRate: 0.23 },
+        { threshold: 15000, baseSalary: 1200, performanceRate: 0.07, classRate: 0.25 },
+        { threshold: 20000, baseSalary: 1300, performanceRate: 0.08, classRate: 0.28 },
+        { threshold: 25000, baseSalary: 1400, performanceRate: 0.09, classRate: 0.30 },
+        { threshold: 30000, baseSalary: 1500, performanceRate: 0.10, classRate: 0.32 },
+        { threshold: 35000, baseSalary: 1600, performanceRate: 0.11, classRate: 0.34 },
+        { threshold: 40000, baseSalary: 1700, performanceRate: 0.12, classRate: 0.36 },
+        { threshold: 45000, baseSalary: 1800, performanceRate: 0.13, classRate: 0.38 },
+        { threshold: 50000, baseSalary: 2000, performanceRate: 0.15, classRate: 0.40 }
+      ];
+
+      // 确定工资等级
+      let level = salaryLevels[0];
+      for (let i = salaryLevels.length - 1; i >= 0; i--) {
+        if (sales >= salaryLevels[i].threshold) {
+          level = salaryLevels[i];
+          break;
+        }
+      }
+
+      // 计算基本工资
+      const baseSalary = level.baseSalary;
+
+      // 计算绩效提成
+      const performanceBonus = sales * level.performanceRate;
+
+      // 计算课时费提成
+      const totalClassAmount = sales + lastMonthBalance;
+      let classLevel = salaryLevels[0];
+      for (let i = salaryLevels.length - 1; i >= 0; i--) {
+        if (totalClassAmount >= salaryLevels[i].threshold) {
+          classLevel = salaryLevels[i];
+          break;
+        }
+      }
+      const classBonus = currentMonthClasses * classLevel.classRate;
+
+      // 计算总工资
+      const totalSalary = baseSalary + performanceBonus + classBonus;
+
+      // 生成详细的结果说明
+      const resultContent = `
+        <p class="font-semibold">销售金额：<span class="text-blue-600">${sales.toFixed(2)}元</span></p>
+        <p class="font-semibold">课时总额：<span class="text-blue-600">${totalClassAmount.toFixed(2)}元</span></p>
+        <p>底薪：<span class="text-blue-600">${baseSalary.toFixed(2)}元</span>（${level.threshold}元档位）</p>
+        <p>绩效提成：<span class="text-blue-600">${performanceBonus.toFixed(2)}元</span> （${(level.performanceRate * 100)}%，基于${sales.toFixed(2)}元销售金额）</p>
+        <p>课时费提成：<span class="text-blue-600">${classBonus.toFixed(2)}元</span> （${(classLevel.classRate * 100)}%，基于${totalClassAmount.toFixed(2)}元课时总额确定比例，实际计算基于${currentMonthClasses.toFixed(2)}元本月上课金额）</p>
+        <p class="text-xl font-bold mt-4">总工资：<span class="text-blue-600">${totalSalary.toFixed(2)}元</span></p>
+        <div class="mt-4 text-sm text-gray-600">
+          <p>计算说明：</p>
+          <p>1. 底薪和绩效提成比例基于本月销售金额（${sales.toFixed(2)}元）确定。</p>
+          <p>2. 课时费提成比例基于课时总额（${totalClassAmount.toFixed(2)}元）确定，但实际计算使用本月上课金额（${currentMonthClasses.toFixed(2)}元）。</p>
+        </div>
+      `;
+
+      // 显示结果
+      document.getElementById('resultContent').innerHTML = resultContent;
+      document.getElementById('result').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
